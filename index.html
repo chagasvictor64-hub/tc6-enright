@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2c7be5">
+  <link rel="manifest" href="manifest.json">
+  <title>TC6 - Enright & Sherrill</title>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #e9f1ff, #f4f6f8);
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    h2 { text-align: center; margin-bottom: 20px; }
+    label { font-size: 14px; font-weight: 600; margin-top: 10px; display: block; }
+    input, select {
+      width: 100%; padding: 12px; margin-top: 5px;
+      border-radius: 10px; border: 1px solid #dcdfe6; font-size: 16px;
+    }
+    button {
+      width: 100%; padding: 14px; margin-top: 20px;
+      border-radius: 12px; border: none;
+      background-color: #2c7be5; color: white;
+      font-size: 16px; font-weight: bold;
+    }
+    .resultado {
+      margin-top: 20px; padding: 15px;
+      border-radius: 12px; background-color: #f0f4ff;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h2>TC6 - Enright & Sherrill</h2>
+
+  <label>Sexo</label>
+  <select id="sexo">
+    <option value="Masculino">Masculino</option>
+    <option value="Feminino">Feminino</option>
+  </select>
+
+  <label>Idade (anos)</label>
+  <input type="number" id="idade">
+
+  <label>Altura (cm)</label>
+  <input type="number" id="altura">
+
+  <label>Peso (kg)</label>
+  <input type="number" id="peso">
+
+  <label>Distância percorrida (m)</label>
+  <input type="number" id="realizado">
+
+  <button onclick="calcular()">Calcular</button>
+
+  <div class="resultado" id="resultado"></div>
+</div>
+
+<script>
+function calcular() {
+  const sexo = document.getElementById("sexo").value;
+  const idade = parseFloat(document.getElementById("idade").value);
+  const altura = parseFloat(document.getElementById("altura").value);
+  const peso = parseFloat(document.getElementById("peso").value);
+  const realizado = parseFloat(document.getElementById("realizado").value);
+
+  if (!idade || !altura || !peso || !realizado) return;
+
+  let previsto;
+  if (sexo === "Masculino") {
+    previsto = (7.57 * altura) - (5.02 * idade) - (1.76 * peso) - 309;
+  } else {
+    previsto = (2.11 * altura) - (2.29 * peso) - (5.78 * idade) + 667;
+  }
+
+  const percentual = (realizado / previsto) * 100;
+
+  document.getElementById("resultado").innerHTML = `
+    <strong>Distância Prevista:</strong> ${previsto.toFixed(1)} m<br>
+    <strong>Percentual:</strong> ${percentual.toFixed(1)}%
+  `;
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+</body>
+</html>
