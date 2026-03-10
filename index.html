@@ -1,103 +1,396 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#2c7be5">
-  <link rel="manifest" href="manifest.json">
-  <title>TC6 - Enright & Sherrill</title>
+<meta charset="UTF-8">
+<title>TC6 Clínico</title>
 
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #e9f1ff, #f4f6f8);
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-    }
-    .card {
-      width: 100%;
-      max-width: 420px;
-      background: #ffffff;
-      padding: 25px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-    h2 { text-align: center; margin-bottom: 20px; }
-    label { font-size: 14px; font-weight: 600; margin-top: 10px; display: block; }
-    input, select {
-      width: 100%; padding: 12px; margin-top: 5px;
-      border-radius: 10px; border: 1px solid #dcdfe6; font-size: 16px;
-    }
-    button {
-      width: 100%; padding: 14px; margin-top: 20px;
-      border-radius: 12px; border: none;
-      background-color: #2c7be5; color: white;
-      font-size: 16px; font-weight: bold;
-    }
-    .resultado {
-      margin-top: 20px; padding: 15px;
-      border-radius: 12px; background-color: #f0f4ff;
-    }
-  </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+font-family: Arial;
+background:#eef3f8;
+margin:0;
+}
+
+header{
+background:#0b3d91;
+color:white;
+padding:18px;
+text-align:center;
+font-size:22px;
+}
+
+.container{
+max-width:800px;
+margin:auto;
+padding:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+margin-bottom:20px;
+box-shadow:0 0 10px rgba(0,0,0,0.08);
+}
+
+input{
+padding:8px;
+margin:6px;
+width:120px;
+}
+
+button{
+padding:12px 18px;
+border:none;
+border-radius:8px;
+background:#0b3d91;
+color:white;
+cursor:pointer;
+}
+
+#timer{
+font-size:52px;
+text-align:center;
+color:#0b3d91;
+}
+
+#voltas{
+font-size:32px;
+text-align:center;
+margin:10px;
+}
+
+.modal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+justify-content:center;
+align-items:center;
+}
+
+.modal-content{
+background:white;
+padding:25px;
+border-radius:10px;
+width:300px;
+text-align:center;
+}
+
+canvas{
+margin-top:20px;
+}
+
+</style>
 </head>
+
 <body>
+
+<header>
+Teste de Caminhada de 6 Minutos
+</header>
+
+<div class="container">
+
 <div class="card">
-  <h2>TC6 - Enright & Sherrill</h2>
 
-  <label>Sexo</label>
-  <select id="sexo">
-    <option value="Masculino">Masculino</option>
-    <option value="Feminino">Feminino</option>
-  </select>
+<h3>Paciente</h3>
 
-  <label>Idade (anos)</label>
-  <input type="number" id="idade">
+<input id="idade" placeholder="Idade">
+<input id="altura" placeholder="Altura cm">
+<input id="peso" placeholder="Peso kg">
 
-  <label>Altura (cm)</label>
-  <input type="number" id="altura">
+<select id="sexo">
+<option value="m">Masculino</option>
+<option value="f">Feminino</option>
+</select>
 
-  <label>Peso (kg)</label>
-  <input type="number" id="peso">
+</div>
 
-  <label>Distância percorrida (m)</label>
-  <input type="number" id="realizado">
+<div class="card">
 
-  <button onclick="calcular()">Calcular</button>
+<h3>Cronômetro</h3>
 
-  <div class="resultado" id="resultado"></div>
+<div id="timer">06:00</div>
+
+<button onclick="iniciar()">Iniciar Teste</button>
+
+</div>
+
+<div class="card">
+
+<h3>Voltas</h3>
+
+<div id="voltas">0</div>
+
+<button onclick="addVolta()">+ Volta</button>
+<button onclick="removeVolta()">- Volta</button>
+
+</div>
+
+<div class="card">
+
+<h3>Comprimento do percurso</h3>
+
+<input id="percurso" value="30"> metros
+
+</div>
+
+<div class="card">
+
+<button onclick="calcular()">Calcular Resultado</button>
+
+<div id="resultado"></div>
+
+</div>
+
+<div class="card">
+
+<h3>Gráfico Frequência Cardíaca</h3>
+
+<canvas id="graficoFC"></canvas>
+
+</div>
+
+<div class="card">
+
+<h3>Gráfico SpO2</h3>
+
+<canvas id="graficoSPO2"></canvas>
+
+</div>
+
+</div>
+
+<div class="modal" id="modalVitals">
+
+<div class="modal-content">
+
+<h3 id="momento"></h3>
+
+<input id="fc" placeholder="FC">
+<input id="spo2" placeholder="SpO2">
+<input id="borgD" placeholder="Borg dispneia">
+<input id="borgF" placeholder="Borg fadiga">
+
+<br><br>
+
+<button onclick="salvarVitals()">Salvar</button>
+
+</div>
+
 </div>
 
 <script>
-function calcular() {
-  const sexo = document.getElementById("sexo").value;
-  const idade = parseFloat(document.getElementById("idade").value);
-  const altura = parseFloat(document.getElementById("altura").value);
-  const peso = parseFloat(document.getElementById("peso").value);
-  const realizado = parseFloat(document.getElementById("realizado").value);
 
-  if (!idade || !altura || !peso || !realizado) return;
+let tempo = 360
+let cronometro
+let voltas = 0
+let momentoAtual = ""
 
-  let previsto;
-  if (sexo === "Masculino") {
-    previsto = (7.57 * altura) - (5.02 * idade) - (1.76 * peso) - 309;
-  } else {
-    previsto = (2.11 * altura) - (2.29 * peso) - (5.78 * idade) + 667;
-  }
-
-  const percentual = (realizado / previsto) * 100;
-
-  document.getElementById("resultado").innerHTML = `
-    <strong>Distância Prevista:</strong> ${previsto.toFixed(1)} m<br>
-    <strong>Percentual:</strong> ${percentual.toFixed(1)}%
-  `;
+let vitais = {
+inicio:{},
+min3:{},
+min6:{},
+rec1:{},
+rec5:{}
 }
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js');
+let fcArray = []
+let spo2Array = []
+
+function iniciar(){
+
+abrirModal("inicio")
+
+cronometro = setInterval(()=>{
+
+tempo--
+
+let min = Math.floor(tempo/60)
+let seg = tempo % 60
+
+document.getElementById("timer").innerHTML =
+String(min).padStart(2,"0")+":"+
+String(seg).padStart(2,"0")
+
+if(tempo==180){
+
+abrirModal("min3")
+
 }
+
+if(tempo==0){
+
+clearInterval(cronometro)
+
+abrirModal("min6")
+
+iniciarRecuperacao()
+
+}
+
+},1000)
+
+}
+
+function iniciarRecuperacao(){
+
+setTimeout(()=>{
+
+abrirModal("rec1")
+
+},60000)
+
+setTimeout(()=>{
+
+abrirModal("rec5")
+
+},300000)
+
+}
+
+function abrirModal(momento){
+
+momentoAtual = momento
+
+document.getElementById("momento").innerText =
+"Coleta: "+momento
+
+document.getElementById("modalVitals").style.display="flex"
+
+}
+
+function salvarVitals(){
+
+let fc = document.getElementById("fc").value
+let spo2 = document.getElementById("spo2").value
+
+vitais[momentoAtual] = {
+fc:fc,
+spo2:spo2
+}
+
+fcArray.push(fc)
+spo2Array.push(spo2)
+
+document.getElementById("modalVitals").style.display="none"
+
+}
+
+function addVolta(){
+
+voltas++
+document.getElementById("voltas").innerHTML=voltas
+
+}
+
+function removeVolta(){
+
+if(voltas>0){
+
+voltas--
+document.getElementById("voltas").innerHTML=voltas
+
+}
+
+}
+
+function calcular(){
+
+let percurso =
+Number(document.getElementById("percurso").value)
+
+let distancia = voltas * percurso
+
+let idade =
+Number(document.getElementById("idade").value)
+
+let altura =
+Number(document.getElementById("altura").value)
+
+let peso =
+Number(document.getElementById("peso").value)
+
+let sexo =
+document.getElementById("sexo").value
+
+let previsto
+
+if(sexo=="m"){
+
+previsto =
+(7.57*altura)-(5.02*idade)-(1.76*peso)-309
+
+}else{
+
+previsto =
+(2.11*altura)-(2.29*peso)-(5.78*idade)+667
+
+}
+
+let percentual = (distancia/previsto)*100
+
+document.getElementById("resultado").innerHTML=
+
+"Distância: "+distancia+" m<br>"+
+"Previsto: "+Math.round(previsto)+" m<br>"+
+"Capacidade funcional: "+
+Math.round(percentual)+" %"
+
+gerarGraficos()
+
+}
+
+function gerarGraficos(){
+
+new Chart(document.getElementById("graficoFC"),{
+
+type:"line",
+
+data:{
+labels:["Inicio","3min","6min","1min","5min"],
+
+datasets:[{
+
+label:"Frequência Cardíaca",
+
+data:fcArray
+
+}]
+
+}
+
+})
+
+new Chart(document.getElementById("graficoSPO2"),{
+
+type:"line",
+
+data:{
+labels:["Inicio","3min","6min","1min","5min"],
+
+datasets:[{
+
+label:"SpO2",
+
+data:spo2Array
+
+}]
+
+}
+
+})
+
+}
+
 </script>
+
 </body>
 </html>
