@@ -4,7 +4,9 @@
 <head>
 
 <meta charset="UTF-8">
-<title>TC6 Sistema Clínico</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TC6 Avaliação Funcional</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -12,79 +14,85 @@
 <style>
 
 body{
-font-family:Segoe UI;
-background:#F4F6F9;
+font-family:Arial;
 margin:0;
+background:#F4F6F9;
+overflow-x:hidden;
 }
 
 header{
 background:#7A1E2C;
 color:white;
-padding:20px;
-font-size:24px;
+text-align:center;
+padding:16px;
+font-size:20px;
 font-weight:600;
-display:flex;
-justify-content:space-between;
 }
 
 .container{
-max-width:1200px;
+padding:12px;
+display:flex;
+flex-direction:column;
+gap:12px;
+max-width:500px;
 margin:auto;
-padding:20px;
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:20px;
 }
 
 .card{
 background:white;
-padding:20px;
-border-radius:12px;
-box-shadow:0 4px 12px rgba(0,0,0,0.08);
+padding:15px;
+border-radius:10px;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
 }
 
 h3{
-color:#7A1E2C;
 margin-top:0;
+color:#7A1E2C;
 }
 
 input,select{
 width:100%;
-padding:10px;
-margin-bottom:10px;
+padding:12px;
 border-radius:8px;
 border:1px solid #ccc;
+margin-bottom:10px;
+font-size:16px;
 }
 
 button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:10px;
 background:#7A1E2C;
 color:white;
-border:none;
-padding:12px;
-border-radius:8px;
-cursor:pointer;
-width:100%;
-margin-top:6px;
+font-size:16px;
+margin-top:5px;
 }
 
-button:hover{
-background:#9e2f3c;
+button:active{
+transform:scale(0.97);
 }
 
 #timer{
-font-size:60px;
+font-size:64px;
 text-align:center;
 color:#7A1E2C;
-font-weight:700;
+font-weight:bold;
 }
 
 #instrucao{
-
 text-align:center;
-font-size:18px;
-margin-top:10px;
+font-size:16px;
+margin-top:6px;
 color:#444;
+}
 
+#voltas{
+font-size:42px;
+text-align:center;
+color:#7A1E2C;
+font-weight:bold;
 }
 
 .badge{
@@ -98,6 +106,10 @@ margin-top:10px;
 .verde{background:#2e7d32}
 .amarelo{background:#f9a825}
 .vermelho{background:#c62828}
+
+canvas{
+margin-top:10px;
+}
 
 .modal{
 display:none;
@@ -113,9 +125,10 @@ align-items:center;
 
 .modal-content{
 background:white;
-padding:30px;
-border-radius:12px;
-width:320px;
+padding:20px;
+border-radius:10px;
+width:90%;
+max-width:320px;
 }
 
 </style>
@@ -126,8 +139,7 @@ width:320px;
 
 <header>
 
-<div>🏥 Sistema TC6</div>
-<div>Teste de Caminhada 6 Minutos</div>
+🏥 Sistema TC6
 
 </header>
 
@@ -141,13 +153,15 @@ width:320px;
 
 <input id="idade" placeholder="Idade">
 
-<input id="altura" placeholder="Altura cm">
+<input id="altura" placeholder="Altura (cm)">
 
-<input id="peso" placeholder="Peso kg">
+<input id="peso" placeholder="Peso (kg)">
 
 <select id="sexo">
+
 <option value="m">Masculino</option>
 <option value="f">Feminino</option>
+
 </select>
 
 </div>
@@ -168,7 +182,7 @@ width:320px;
 
 <h3>Voltas</h3>
 
-<div style="font-size:40px;text-align:center;color:#7A1E2C" id="voltas">0</div>
+<div id="voltas">0</div>
 
 <button onclick="addVolta()">Adicionar volta</button>
 
@@ -176,7 +190,7 @@ width:320px;
 
 <div class="card">
 
-<h3>Percurso</h3>
+<h3>Percurso (m)</h3>
 
 <input id="percurso" value="30">
 
@@ -187,11 +201,14 @@ width:320px;
 <h3>Resultado</h3>
 
 <div id="resultado"></div>
+
 <div id="classe"></div>
 
-<button onclick="calcular()">Calcular</button>
+<button onclick="calcular()">Calcular resultado</button>
 
 <button onclick="gerarPDF()">Gerar relatório</button>
+
+<button onclick="compartilhar()">Compartilhar WhatsApp</button>
 
 </div>
 
@@ -229,7 +246,7 @@ width:320px;
 
 <input id="fc" placeholder="FC bpm">
 
-<input id="spo2" placeholder="SpO2 %">
+<input id="spo2" placeholder="SpO₂ %">
 
 <input id="borg" placeholder="Borg 0-10">
 
@@ -271,23 +288,16 @@ document.getElementById("timer").innerHTML=
 String(min).padStart(2,"0")+":"+String(seg).padStart(2,"0")
 
 if(tempo==240){
-
 document.getElementById("instrucao").innerText="Você está indo bem"
-
 }
 
 if(tempo==120){
-
 document.getElementById("instrucao").innerText="Faltam 2 minutos"
-
 abrir("min3")
-
 }
 
 if(tempo==30){
-
 document.getElementById("instrucao").innerText="Continue caminhando"
-
 }
 
 if(tempo==0){
@@ -368,20 +378,22 @@ let interpretacao=""
 
 if(percentual>=80){
 interpretacao="Capacidade funcional preservada"
+document.getElementById("classe").innerHTML='<div class="badge verde">'+interpretacao+'</div>'
 }
 else if(percentual>=60){
-interpretacao="Capacidade funcional moderadamente reduzida"
+interpretacao="Capacidade moderada"
+document.getElementById("classe").innerHTML='<div class="badge amarelo">'+interpretacao+'</div>'
 }
 else{
-interpretacao="Capacidade funcional reduzida"
+interpretacao="Capacidade reduzida"
+document.getElementById("classe").innerHTML='<div class="badge vermelho">'+interpretacao+'</div>'
 }
 
 document.getElementById("resultado").innerHTML=
 
 "Distância: "+distancia+" m<br>"+
 "Previsto: "+Math.round(previsto)+" m<br>"+
-"Capacidade: "+Math.round(percentual)+" %<br><br>"+
-"Interpretação: "+interpretacao
+"Capacidade: "+Math.round(percentual)+" %"
 
 gerarGraficos()
 
@@ -391,26 +403,20 @@ function gerarGraficos(){
 
 new Chart(graficoFC,{
 type:"line",
-data:{
-labels:["inicio","3min","6min","1min","5min"],
-datasets:[{label:"FC",data:fc}]
-}
+data:{labels:["inicio","3min","6min","1min","5min"],
+datasets:[{label:"FC",data:fc}]}
 })
 
 new Chart(graficoSPO2,{
 type:"line",
-data:{
-labels:["inicio","3min","6min","1min","5min"],
-datasets:[{label:"SpO2",data:spo2}]
-}
+data:{labels:["inicio","3min","6min","1min","5min"],
+datasets:[{label:"SpO2",data:spo2}]}
 })
 
 new Chart(graficoBORG,{
 type:"line",
-data:{
-labels:["inicio","3min","6min","1min","5min"],
-datasets:[{label:"Borg",data:borg}]
-}
+data:{labels:["inicio","3min","6min","1min","5min"],
+datasets:[{label:"Borg",data:borg}]}
 })
 
 }
@@ -423,21 +429,29 @@ let doc=new jsPDF()
 
 doc.setFontSize(18)
 
-doc.text("Relatório Clínico TC6",20,20)
+doc.text("Relatório TC6",20,20)
 
 doc.setFontSize(12)
 
-doc.text("Clínica de Reabilitação",20,35)
+doc.text("Paciente: "+document.getElementById("nome").value,20,40)
 
-doc.text("Paciente: "+document.getElementById("nome").value,20,50)
+doc.text(document.getElementById("resultado").innerText,20,60)
 
-doc.text(document.getElementById("resultado").innerText,20,70)
+doc.text("Assinatura profissional",20,200)
 
-doc.text("Assinatura do profissional:",20,200)
-
-doc.text("_________________________",20,210)
+doc.text("_______________________",20,210)
 
 doc.save("relatorio_TC6.pdf")
+
+}
+
+function compartilhar(){
+
+let texto="Resultado TC6: "+document.getElementById("resultado").innerText
+
+let url="https://wa.me/?text="+encodeURIComponent(texto)
+
+window.open(url)
 
 }
 
