@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>TC6 Avaliação Funcional</title>
+<title>TC6 Avaliação Clínica</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -17,25 +17,24 @@ body{
 font-family:Arial;
 margin:0;
 background:#F4F6F9;
-overflow-x:hidden;
 }
 
 header{
-background:#7A1E2C;
+background:#6D1B2B;
 color:white;
+padding:15px;
 text-align:center;
-padding:16px;
-font-size:20px;
-font-weight:600;
+font-size:22px;
+font-weight:bold;
 }
 
 .container{
+max-width:500px;
+margin:auto;
 padding:12px;
 display:flex;
 flex-direction:column;
 gap:12px;
-max-width:500px;
-margin:auto;
 }
 
 .card{
@@ -47,59 +46,53 @@ box-shadow:0 2px 10px rgba(0,0,0,0.1);
 
 h3{
 margin-top:0;
-color:#7A1E2C;
+color:#6D1B2B;
 }
 
 input,select{
 width:100%;
 padding:12px;
+margin-top:6px;
 border-radius:8px;
 border:1px solid #ccc;
-margin-bottom:10px;
 font-size:16px;
 }
 
 button{
 width:100%;
 padding:14px;
+margin-top:8px;
 border:none;
 border-radius:10px;
-background:#7A1E2C;
+background:#6D1B2B;
 color:white;
 font-size:16px;
-margin-top:5px;
-}
-
-button:active{
-transform:scale(0.97);
 }
 
 #timer{
-font-size:64px;
+font-size:60px;
 text-align:center;
-color:#7A1E2C;
 font-weight:bold;
+color:#6D1B2B;
 }
 
 #instrucao{
 text-align:center;
-font-size:16px;
 margin-top:6px;
 color:#444;
 }
 
 #voltas{
-font-size:42px;
+font-size:40px;
 text-align:center;
-color:#7A1E2C;
-font-weight:bold;
+color:#6D1B2B;
 }
 
 .badge{
 padding:10px;
 border-radius:8px;
-color:white;
 text-align:center;
+color:white;
 margin-top:10px;
 }
 
@@ -118,9 +111,10 @@ top:0;
 left:0;
 width:100%;
 height:100%;
-background:rgba(0,0,0,0.5);
+background:rgba(0,0,0,0.6);
 justify-content:center;
 align-items:center;
+z-index:999;
 }
 
 .modal-content{
@@ -131,6 +125,15 @@ width:90%;
 max-width:320px;
 }
 
+.alerta{
+background:#c62828;
+color:white;
+padding:8px;
+margin-top:6px;
+border-radius:6px;
+text-align:center;
+}
+
 </style>
 
 </head>
@@ -138,9 +141,7 @@ max-width:320px;
 <body>
 
 <header>
-
-🏥 Sistema TC6
-
+🏥 TC6 Avaliação Funcional
 </header>
 
 <div class="container">
@@ -158,10 +159,8 @@ max-width:320px;
 <input id="peso" placeholder="Peso (kg)">
 
 <select id="sexo">
-
 <option value="m">Masculino</option>
 <option value="f">Feminino</option>
-
 </select>
 
 </div>
@@ -184,7 +183,7 @@ max-width:320px;
 
 <div id="voltas">0</div>
 
-<button onclick="addVolta()">Adicionar volta</button>
+<button onclick="addVolta()">Registrar volta</button>
 
 </div>
 
@@ -204,9 +203,9 @@ max-width:320px;
 
 <div id="classe"></div>
 
-<button onclick="calcular()">Calcular resultado</button>
+<button onclick="calcular()">Calcular</button>
 
-<button onclick="gerarPDF()">Gerar relatório</button>
+<button onclick="gerarPDF()">Gerar PDF</button>
 
 <button onclick="compartilhar()">Compartilhar WhatsApp</button>
 
@@ -214,24 +213,21 @@ max-width:320px;
 
 <div class="card">
 
-<h3>FC vs tempo</h3>
-
+<h3>FC vs Tempo</h3>
 <canvas id="graficoFC"></canvas>
 
 </div>
 
 <div class="card">
 
-<h3>SpO₂ vs tempo</h3>
-
+<h3>SpO₂ vs Tempo</h3>
 <canvas id="graficoSPO2"></canvas>
 
 </div>
 
 <div class="card">
 
-<h3>Borg vs tempo</h3>
-
+<h3>Borg vs Tempo</h3>
 <canvas id="graficoBORG"></canvas>
 
 </div>
@@ -250,6 +246,8 @@ max-width:320px;
 
 <input id="borg" placeholder="Borg 0-10">
 
+<div id="alerta"></div>
+
 <button onclick="salvar()">Salvar</button>
 
 </div>
@@ -267,15 +265,11 @@ let fc=[null,null,null,null,null]
 let spo2=[null,null,null,null,null]
 let borg=[null,null,null,null,null]
 
-let vitais={inicio:{},min3:{},min6:{},rec1:{},rec5:{}}
-
 let momentoAtual=""
 
 function iniciar(){
 
-document.getElementById("instrucao").innerText="Comece a caminhar"
-
-abrir("inicio")
+abrir("Início")
 
 cronometro=setInterval(()=>{
 
@@ -293,7 +287,7 @@ document.getElementById("instrucao").innerText="Você está indo bem"
 
 if(tempo==120){
 document.getElementById("instrucao").innerText="Faltam 2 minutos"
-abrir("min3")
+abrir("3 minutos")
 }
 
 if(tempo==30){
@@ -306,10 +300,11 @@ clearInterval(cronometro)
 
 document.getElementById("instrucao").innerText="Teste finalizado"
 
-abrir("min6")
+abrir("6 minutos")
 
-setTimeout(()=>abrir("rec1"),60000)
-setTimeout(()=>abrir("rec5"),300000)
+setTimeout(()=>abrir("Recuperação 1min"),60000)
+
+setTimeout(()=>abrir("Recuperação 5min"),300000)
 
 }
 
@@ -321,9 +316,15 @@ function abrir(m){
 
 momentoAtual=m
 
-document.getElementById("momento").innerText="Coleta "+m
+document.getElementById("momento").innerText=m
 
 document.getElementById("modal").style.display="flex"
+
+document.getElementById("alerta").innerHTML=""
+
+document.getElementById("fc").value=""
+document.getElementById("spo2").value=""
+document.getElementById("borg").value=""
 
 }
 
@@ -333,13 +334,16 @@ let f=document.getElementById("fc").value
 let s=document.getElementById("spo2").value
 let b=document.getElementById("borg").value
 
-vitais[momentoAtual]={fc:f,spo2:s,borg:b}
+if(s<90){
 
-if(momentoAtual=="inicio"){fc[0]=f;spo2[0]=s;borg[0]=b}
-if(momentoAtual=="min3"){fc[1]=f;spo2[1]=s;borg[1]=b}
-if(momentoAtual=="min6"){fc[2]=f;spo2[2]=s;borg[2]=b}
-if(momentoAtual=="rec1"){fc[3]=f;spo2[3]=s;borg[3]=b}
-if(momentoAtual=="rec5"){fc[4]=f;spo2[4]=s;borg[4]=b}
+document.getElementById("alerta").innerHTML=
+'<div class="alerta">Dessaturação detectada</div>'
+
+}
+
+fc.push(f)
+spo2.push(s)
+borg.push(b)
 
 document.getElementById("modal").style.display="none"
 
@@ -380,10 +384,12 @@ if(percentual>=80){
 interpretacao="Capacidade funcional preservada"
 document.getElementById("classe").innerHTML='<div class="badge verde">'+interpretacao+'</div>'
 }
+
 else if(percentual>=60){
 interpretacao="Capacidade moderada"
 document.getElementById("classe").innerHTML='<div class="badge amarelo">'+interpretacao+'</div>'
 }
+
 else{
 interpretacao="Capacidade reduzida"
 document.getElementById("classe").innerHTML='<div class="badge vermelho">'+interpretacao+'</div>'
@@ -403,19 +409,19 @@ function gerarGraficos(){
 
 new Chart(graficoFC,{
 type:"line",
-data:{labels:["inicio","3min","6min","1min","5min"],
+data:{labels:["Inicio","3m","6m","Rec1","Rec5"],
 datasets:[{label:"FC",data:fc}]}
 })
 
 new Chart(graficoSPO2,{
 type:"line",
-data:{labels:["inicio","3min","6min","1min","5min"],
-datasets:[{label:"SpO2",data:spo2}]}
+data:{labels:["Inicio","3m","6m","Rec1","Rec5"],
+datasets:[{label:"SpO₂",data:spo2}]}
 })
 
 new Chart(graficoBORG,{
 type:"line",
-data:{labels:["inicio","3min","6min","1min","5min"],
+data:{labels:["Inicio","3m","6m","Rec1","Rec5"],
 datasets:[{label:"Borg",data:borg}]}
 })
 
@@ -427,21 +433,13 @@ const { jsPDF } = window.jspdf
 
 let doc=new jsPDF()
 
-doc.setFontSize(18)
-
 doc.text("Relatório TC6",20,20)
 
-doc.setFontSize(12)
-
-doc.text("Paciente: "+document.getElementById("nome").value,20,40)
-
-doc.text(document.getElementById("resultado").innerText,20,60)
+doc.text(document.getElementById("resultado").innerText,20,40)
 
 doc.text("Assinatura profissional",20,200)
 
-doc.text("_______________________",20,210)
-
-doc.save("relatorio_TC6.pdf")
+doc.save("tc6.pdf")
 
 }
 
