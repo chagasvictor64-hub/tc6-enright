@@ -4,6 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
+
 <title>TC6 Avaliação Funcional</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,23 +14,23 @@
 
 body{
 font-family:Segoe UI;
-background:#eef3f9;
+background:#F6F2F3;
 margin:0;
 }
 
 header{
-background:linear-gradient(90deg,#0f4c81,#2b8ed6);
+background:linear-gradient(90deg,#7A1E2C,#B23A48);
 color:white;
 padding:25px;
-font-size:26px;
+font-size:28px;
 text-align:center;
 font-weight:600;
 }
 
 .container{
-max-width:1000px;
+max-width:1100px;
 margin:auto;
-padding:20px;
+padding:25px;
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:20px;
@@ -43,35 +44,63 @@ box-shadow:0 4px 20px rgba(0,0,0,0.08);
 }
 
 input,select{
-padding:8px;
+padding:10px;
 margin:6px;
 width:90%;
+border-radius:8px;
+border:1px solid #ddd;
 }
 
 button{
-background:#2b8ed6;
+background:#7A1E2C;
 color:white;
 border:none;
 padding:12px 20px;
 border-radius:10px;
 cursor:pointer;
+font-size:14px;
+}
+
+button:hover{
+background:#B23A48;
 }
 
 #timer{
-font-size:60px;
+font-size:65px;
 text-align:center;
-color:#2b8ed6;
+color:#7A1E2C;
 font-weight:700;
 }
 
 #voltas{
-font-size:40px;
+font-size:42px;
 text-align:center;
+font-weight:600;
+color:#7A1E2C;
 }
 
-.resultado{
-font-size:18px;
-line-height:1.6;
+.badge{
+
+padding:10px;
+border-radius:10px;
+color:white;
+font-weight:600;
+text-align:center;
+margin-top:10px;
+
+}
+
+.verde{background:#2e7d32}
+.amarelo{background:#f9a825}
+.vermelho{background:#c62828}
+
+.escala{
+
+height:15px;
+border-radius:10px;
+background:linear-gradient(90deg,#c62828,#f9a825,#2e7d32);
+margin-top:10px;
+
 }
 
 .modal{
@@ -94,7 +123,7 @@ text-align:center;
 }
 
 canvas{
-margin-top:15px;
+margin-top:10px;
 }
 
 </style>
@@ -104,14 +133,16 @@ margin-top:15px;
 <body>
 
 <header>
-Teste de Caminhada de 6 Minutos
+
+🏥 Avaliação Funcional – TC6
+
 </header>
 
 <div class="container">
 
 <div class="card">
 
-<h3>Paciente</h3>
+<h3>👤 Paciente</h3>
 
 <input id="nome" placeholder="Nome">
 
@@ -122,25 +153,27 @@ Teste de Caminhada de 6 Minutos
 <input id="peso" placeholder="Peso (kg)">
 
 <select id="sexo">
+
 <option value="m">Masculino</option>
 <option value="f">Feminino</option>
+
 </select>
 
 </div>
 
 <div class="card">
 
-<h3>Cronômetro</h3>
+<h3>⏱ Cronômetro</h3>
 
 <div id="timer">06:00</div>
 
-<button onclick="iniciar()">Iniciar teste</button>
+<button onclick="iniciar()">▶ Iniciar Teste</button>
 
 </div>
 
 <div class="card">
 
-<h3>Voltas</h3>
+<h3>🔄 Voltas</h3>
 
 <div id="voltas">0</div>
 
@@ -151,7 +184,7 @@ Teste de Caminhada de 6 Minutos
 
 <div class="card">
 
-<h3>Percurso</h3>
+<h3>📏 Percurso</h3>
 
 <input id="percurso" value="30">
 
@@ -159,18 +192,23 @@ Teste de Caminhada de 6 Minutos
 
 <div class="card">
 
-<h3>Resultado</h3>
+<h3>📊 Resultado</h3>
 
-<div id="resultado" class="resultado"></div>
+<div id="resultado"></div>
 
-<button onclick="calcular()">Calcular</button>
-<button onclick="gerarPDF()">Gerar PDF</button>
+<div class="escala"></div>
+
+<div id="classificacao"></div>
+
+<button onclick="calcular()">Calcular Resultado</button>
+
+<button onclick="gerarPDF()">📄 Gerar PDF</button>
 
 </div>
 
 <div class="card">
 
-<h3>Frequência Cardíaca</h3>
+<h3>❤️ Frequência Cardíaca</h3>
 
 <canvas id="graficoFC"></canvas>
 
@@ -178,7 +216,7 @@ Teste de Caminhada de 6 Minutos
 
 <div class="card">
 
-<h3>Saturação de Oxigênio</h3>
+<h3>🫁 Saturação (SpO₂)</h3>
 
 <canvas id="graficoSPO2"></canvas>
 
@@ -192,9 +230,9 @@ Teste de Caminhada de 6 Minutos
 
 <h3 id="momento"></h3>
 
-<input id="fc" placeholder="Frequência cardíaca">
+<input id="fc" placeholder="FC (bpm) ❤️">
 
-<input id="spo2" placeholder="SpO2">
+<input id="spo2" placeholder="SpO₂ (%) 🫁">
 
 <button onclick="salvar()">Salvar</button>
 
@@ -208,13 +246,7 @@ let tempo=360
 let cronometro
 let voltas=0
 
-let vitais={
-inicio:{},
-min3:{},
-min6:{},
-rec1:{},
-rec5:{}
-}
+let vitais={inicio:{},min3:{},min6:{},rec1:{},rec5:{}}
 
 let fcArray=[null,null,null,null,null]
 let spo2Array=[null,null,null,null,null]
@@ -233,14 +265,9 @@ let min=Math.floor(tempo/60)
 let seg=tempo%60
 
 document.getElementById("timer").innerHTML=
-String(min).padStart(2,"0")+":"+
-String(seg).padStart(2,"0")
+String(min).padStart(2,"0")+":"+String(seg).padStart(2,"0")
 
-if(tempo==180){
-
-abrir("min3")
-
-}
+if(tempo==180) abrir("min3")
 
 if(tempo==0){
 
@@ -249,7 +276,6 @@ clearInterval(cronometro)
 abrir("min6")
 
 setTimeout(()=>abrir("rec1"),60000)
-
 setTimeout(()=>abrir("rec5"),300000)
 
 }
@@ -262,7 +288,7 @@ function abrir(m){
 
 momentoAtual=m
 
-document.getElementById("momento").innerText="Coleta "+m
+document.getElementById("momento").innerText="📋 Coleta "+m
 
 document.getElementById("modal").style.display="flex"
 
@@ -285,22 +311,8 @@ document.getElementById("modal").style.display="none"
 
 }
 
-function addVolta(){
-
-voltas++
-
-document.getElementById("voltas").innerText=voltas
-
-}
-
-function removeVolta(){
-
-if(voltas>0){
-voltas--
-document.getElementById("voltas").innerText=voltas
-}
-
-}
+function addVolta(){voltas++;document.getElementById("voltas").innerText=voltas}
+function removeVolta(){if(voltas>0){voltas--;document.getElementById("voltas").innerText=voltas}}
 
 function calcular(){
 
@@ -316,22 +328,34 @@ let sexo=document.getElementById("sexo").value
 let previsto
 
 if(sexo=="m"){
-
 previsto=(7.57*altura)-(5.02*idade)-(1.76*peso)-309
-
 }else{
-
 previsto=(2.11*altura)-(2.29*peso)-(5.78*idade)+667
-
 }
 
 let percentual=(distancia/previsto)*100
 
 document.getElementById("resultado").innerHTML=
 
-"Distância: "+distancia+" m <br>"+
-"Previsto: "+Math.round(previsto)+" m <br>"+
-"Capacidade funcional: "+Math.round(percentual)+" %"
+"📏 Distância: "+distancia+" m <br>"+
+"📊 Previsto: "+Math.round(previsto)+" m <br>"+
+"⚡ Capacidade funcional: "+Math.round(percentual)+" %"
+
+let classe=""
+
+if(percentual>=80){
+classe='<div class="badge verde">Excelente capacidade funcional</div>'
+}
+
+else if(percentual>=60){
+classe='<div class="badge amarelo">Capacidade funcional moderada</div>'
+}
+
+else{
+classe='<div class="badge vermelho">Capacidade funcional reduzida</div>'
+}
+
+document.getElementById("classificacao").innerHTML=classe
 
 gerarGraficos()
 
@@ -345,10 +369,7 @@ type:"line",
 
 data:{
 labels:["Inicio","3 min","6 min","1 min","5 min"],
-datasets:[{
-label:"FC",
-data:fcArray
-}]
+datasets:[{label:"FC",data:fcArray}]
 }
 
 })
@@ -359,10 +380,7 @@ type:"line",
 
 data:{
 labels:["Inicio","3 min","6 min","1 min","5 min"],
-datasets:[{
-label:"SpO2",
-data:spo2Array
-}]
+datasets:[{label:"SpO2",data:spo2Array}]
 }
 
 })
@@ -376,40 +394,22 @@ const { jsPDF } = window.jspdf
 let doc=new jsPDF()
 
 let nome=document.getElementById("nome").value
-let data=new Date().toLocaleDateString()
 
 doc.text("Relatório TC6",20,20)
 
 doc.text("Paciente: "+nome,20,35)
-doc.text("Data: "+data,20,45)
 
-doc.text("Sinais Vitais",20,60)
+doc.text("FC início "+vitais.inicio.fc,20,50)
+doc.text("FC 3 min "+vitais.min3.fc,20,60)
+doc.text("FC 6 min "+vitais.min6.fc,20,70)
+doc.text("FC 1 min "+vitais.rec1.fc,20,80)
+doc.text("FC 5 min "+vitais.rec5.fc,20,90)
 
-doc.text("FC início "+vitais.inicio.fc,20,70)
-doc.text("FC 3 min "+vitais.min3.fc,20,80)
-doc.text("FC 6 min "+vitais.min6.fc,20,90)
-doc.text("FC 1 min "+vitais.rec1.fc,20,100)
-doc.text("FC 5 min "+vitais.rec5.fc,20,110)
-
-doc.text("SpO2 início "+vitais.inicio.spo2,20,130)
-doc.text("SpO2 3 min "+vitais.min3.spo2,20,140)
-doc.text("SpO2 6 min "+vitais.min6.spo2,20,150)
-doc.text("SpO2 1 min "+vitais.rec1.spo2,20,160)
-doc.text("SpO2 5 min "+vitais.rec5.spo2,20,170)
-
-let graficoFC=document.getElementById("graficoFC")
-let imgFC=graficoFC.toDataURL("image/png")
-
-doc.addPage()
-
-doc.addImage(imgFC,"PNG",20,20,170,90)
-
-let graficoSPO2=document.getElementById("graficoSPO2")
-let imgSPO2=graficoSPO2.toDataURL("image/png")
-
-doc.addPage()
-
-doc.addImage(imgSPO2,"PNG",20,20,170,90)
+doc.text("SpO2 início "+vitais.inicio.spo2,20,110)
+doc.text("SpO2 3 min "+vitais.min3.spo2,20,120)
+doc.text("SpO2 6 min "+vitais.min6.spo2,20,130)
+doc.text("SpO2 1 min "+vitais.rec1.spo2,20,140)
+doc.text("SpO2 5 min "+vitais.rec5.spo2,20,150)
 
 doc.save("relatorio_TC6.pdf")
 
