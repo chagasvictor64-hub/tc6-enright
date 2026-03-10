@@ -14,21 +14,28 @@
 
 body{
 font-family:Segoe UI;
-background:#F6F2F3;
+background:#F3F4F6;
 margin:0;
 }
 
 header{
-background:linear-gradient(90deg,#7A1E2C,#B23A48);
+background:#7A1E2C;
 color:white;
-padding:25px;
-font-size:28px;
-text-align:center;
+padding:20px;
+font-size:26px;
 font-weight:600;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+header span{
+font-size:14px;
+opacity:0.8;
 }
 
 .container{
-max-width:1100px;
+max-width:1200px;
 margin:auto;
 padding:25px;
 display:grid;
@@ -37,28 +44,41 @@ gap:20px;
 }
 
 .card{
+
 background:white;
+border-radius:12px;
 padding:20px;
-border-radius:14px;
-box-shadow:0 4px 20px rgba(0,0,0,0.08);
+box-shadow:0 3px 15px rgba(0,0,0,0.08);
+
+}
+
+h3{
+margin-top:0;
+color:#7A1E2C;
 }
 
 input,select{
+
+width:100%;
 padding:10px;
-margin:6px;
-width:90%;
+margin-top:6px;
+margin-bottom:10px;
 border-radius:8px;
 border:1px solid #ddd;
+
 }
 
 button{
+
 background:#7A1E2C;
 color:white;
 border:none;
-padding:12px 20px;
+padding:12px;
 border-radius:10px;
 cursor:pointer;
-font-size:14px;
+margin-top:10px;
+width:100%;
+
 }
 
 button:hover{
@@ -66,25 +86,25 @@ background:#B23A48;
 }
 
 #timer{
-font-size:65px;
+font-size:60px;
 text-align:center;
-color:#7A1E2C;
 font-weight:700;
+color:#7A1E2C;
 }
 
 #voltas{
-font-size:42px;
+
+font-size:40px;
 text-align:center;
-font-weight:600;
 color:#7A1E2C;
+
 }
 
 .badge{
 
 padding:10px;
-border-radius:10px;
+border-radius:8px;
 color:white;
-font-weight:600;
 text-align:center;
 margin-top:10px;
 
@@ -94,36 +114,27 @@ margin-top:10px;
 .amarelo{background:#f9a825}
 .vermelho{background:#c62828}
 
-.escala{
-
-height:15px;
-border-radius:10px;
-background:linear-gradient(90deg,#c62828,#f9a825,#2e7d32);
-margin-top:10px;
-
-}
-
 .modal{
+
 display:none;
 position:fixed;
 top:0;
 left:0;
 width:100%;
 height:100%;
-background:rgba(0,0,0,0.4);
+background:rgba(0,0,0,0.5);
 justify-content:center;
 align-items:center;
+
 }
 
 .modal-content{
-background:white;
-padding:25px;
-border-radius:12px;
-text-align:center;
-}
 
-canvas{
-margin-top:10px;
+background:white;
+padding:30px;
+border-radius:12px;
+width:300px;
+
 }
 
 </style>
@@ -134,7 +145,9 @@ margin-top:10px;
 
 <header>
 
-🏥 Avaliação Funcional – TC6
+<div>🏥 Sistema TC6</div>
+
+<span>Avaliação Funcional</span>
 
 </header>
 
@@ -142,7 +155,7 @@ margin-top:10px;
 
 <div class="card">
 
-<h3>👤 Paciente</h3>
+<h3>👤 Dados do Paciente</h3>
 
 <input id="nome" placeholder="Nome">
 
@@ -167,7 +180,7 @@ margin-top:10px;
 
 <div id="timer">06:00</div>
 
-<button onclick="iniciar()">▶ Iniciar Teste</button>
+<button onclick="iniciar()">Iniciar Teste</button>
 
 </div>
 
@@ -177,8 +190,7 @@ margin-top:10px;
 
 <div id="voltas">0</div>
 
-<button onclick="addVolta()">+ Volta</button>
-<button onclick="removeVolta()">- Volta</button>
+<button onclick="addVolta()">Adicionar volta</button>
 
 </div>
 
@@ -196,19 +208,19 @@ margin-top:10px;
 
 <div id="resultado"></div>
 
-<div class="escala"></div>
-
-<div id="classificacao"></div>
+<div id="classe"></div>
 
 <button onclick="calcular()">Calcular Resultado</button>
 
-<button onclick="gerarPDF()">📄 Gerar PDF</button>
+<button onclick="gerarPDF()">Gerar PDF</button>
+
+<button onclick="compartilharWhats()">Compartilhar WhatsApp</button>
 
 </div>
 
 <div class="card">
 
-<h3>❤️ Frequência Cardíaca</h3>
+<h3>📈 Frequência Cardíaca</h3>
 
 <canvas id="graficoFC"></canvas>
 
@@ -216,7 +228,7 @@ margin-top:10px;
 
 <div class="card">
 
-<h3>🫁 Saturação (SpO₂)</h3>
+<h3>🫁 Saturação</h3>
 
 <canvas id="graficoSPO2"></canvas>
 
@@ -230,9 +242,13 @@ margin-top:10px;
 
 <h3 id="momento"></h3>
 
-<input id="fc" placeholder="FC (bpm) ❤️">
+<input id="fc" placeholder="FC">
 
-<input id="spo2" placeholder="SpO₂ (%) 🫁">
+<input id="spo2" placeholder="SpO2">
+
+<input id="borgD" placeholder="Borg Dispneia">
+
+<input id="borgF" placeholder="Borg Fadiga">
 
 <button onclick="salvar()">Salvar</button>
 
@@ -244,12 +260,15 @@ margin-top:10px;
 
 let tempo=360
 let cronometro
+
 let voltas=0
 
-let vitais={inicio:{},min3:{},min6:{},rec1:{},rec5:{}}
+let fc=[null,null,null,null,null]
+let spo2=[null,null,null,null,null]
 
-let fcArray=[null,null,null,null,null]
-let spo2Array=[null,null,null,null,null]
+let vitais={
+inicio:{},min3:{},min6:{},rec1:{},rec5:{}
+}
 
 let momentoAtual=""
 
@@ -276,6 +295,7 @@ clearInterval(cronometro)
 abrir("min6")
 
 setTimeout(()=>abrir("rec1"),60000)
+
 setTimeout(()=>abrir("rec5"),300000)
 
 }
@@ -288,7 +308,7 @@ function abrir(m){
 
 momentoAtual=m
 
-document.getElementById("momento").innerText="📋 Coleta "+m
+document.getElementById("momento").innerText="Coleta "+m
 
 document.getElementById("modal").style.display="flex"
 
@@ -296,23 +316,30 @@ document.getElementById("modal").style.display="flex"
 
 function salvar(){
 
-let fc=document.getElementById("fc").value
-let spo2=document.getElementById("spo2").value
+let f=document.getElementById("fc").value
+let s=document.getElementById("spo2").value
+let bd=document.getElementById("borgD").value
+let bf=document.getElementById("borgF").value
 
-vitais[momentoAtual]={fc:fc,spo2:spo2}
+vitais[momentoAtual]={fc:f,spo2:s,borgD:bd,borgF:bf}
 
-if(momentoAtual=="inicio"){fcArray[0]=fc;spo2Array[0]=spo2}
-if(momentoAtual=="min3"){fcArray[1]=fc;spo2Array[1]=spo2}
-if(momentoAtual=="min6"){fcArray[2]=fc;spo2Array[2]=spo2}
-if(momentoAtual=="rec1"){fcArray[3]=fc;spo2Array[3]=spo2}
-if(momentoAtual=="rec5"){fcArray[4]=fc;spo2Array[4]=spo2}
+if(momentoAtual=="inicio"){fc[0]=f;spo2[0]=s}
+if(momentoAtual=="min3"){fc[1]=f;spo2[1]=s}
+if(momentoAtual=="min6"){fc[2]=f;spo2[2]=s}
+if(momentoAtual=="rec1"){fc[3]=f;spo2[3]=s}
+if(momentoAtual=="rec5"){fc[4]=f;spo2[4]=s}
 
 document.getElementById("modal").style.display="none"
 
 }
 
-function addVolta(){voltas++;document.getElementById("voltas").innerText=voltas}
-function removeVolta(){if(voltas>0){voltas--;document.getElementById("voltas").innerText=voltas}}
+function addVolta(){
+
+voltas++
+
+document.getElementById("voltas").innerText=voltas
+
+}
 
 function calcular(){
 
@@ -328,34 +355,44 @@ let sexo=document.getElementById("sexo").value
 let previsto
 
 if(sexo=="m"){
+
 previsto=(7.57*altura)-(5.02*idade)-(1.76*peso)-309
+
 }else{
+
 previsto=(2.11*altura)-(2.29*peso)-(5.78*idade)+667
+
 }
 
 let percentual=(distancia/previsto)*100
 
 document.getElementById("resultado").innerHTML=
 
-"📏 Distância: "+distancia+" m <br>"+
-"📊 Previsto: "+Math.round(previsto)+" m <br>"+
-"⚡ Capacidade funcional: "+Math.round(percentual)+" %"
+"Distância: "+distancia+" m<br>"+
+"Previsto: "+Math.round(previsto)+" m<br>"+
+"Capacidade: "+Math.round(percentual)+" %"
 
 let classe=""
 
 if(percentual>=80){
-classe='<div class="badge verde">Excelente capacidade funcional</div>'
+
+classe='<div class="badge verde">Capacidade funcional preservada</div>'
+
 }
 
 else if(percentual>=60){
-classe='<div class="badge amarelo">Capacidade funcional moderada</div>'
+
+classe='<div class="badge amarelo">Capacidade moderada</div>'
+
 }
 
 else{
-classe='<div class="badge vermelho">Capacidade funcional reduzida</div>'
+
+classe='<div class="badge vermelho">Capacidade reduzida</div>'
+
 }
 
-document.getElementById("classificacao").innerHTML=classe
+document.getElementById("classe").innerHTML=classe
 
 gerarGraficos()
 
@@ -369,7 +406,7 @@ type:"line",
 
 data:{
 labels:["Inicio","3 min","6 min","1 min","5 min"],
-datasets:[{label:"FC",data:fcArray}]
+datasets:[{label:"FC",data:fc}]
 }
 
 })
@@ -380,7 +417,7 @@ type:"line",
 
 data:{
 labels:["Inicio","3 min","6 min","1 min","5 min"],
-datasets:[{label:"SpO2",data:spo2Array}]
+datasets:[{label:"SpO2",data:spo2}]
 }
 
 })
@@ -397,25 +434,26 @@ let nome=document.getElementById("nome").value
 
 doc.text("Relatório TC6",20,20)
 
-doc.text("Paciente: "+nome,20,35)
+doc.text("Paciente: "+nome,20,40)
 
-doc.text("FC início "+vitais.inicio.fc,20,50)
-doc.text("FC 3 min "+vitais.min3.fc,20,60)
-doc.text("FC 6 min "+vitais.min6.fc,20,70)
-doc.text("FC 1 min "+vitais.rec1.fc,20,80)
-doc.text("FC 5 min "+vitais.rec5.fc,20,90)
+doc.save("TC6.pdf")
 
-doc.text("SpO2 início "+vitais.inicio.spo2,20,110)
-doc.text("SpO2 3 min "+vitais.min3.spo2,20,120)
-doc.text("SpO2 6 min "+vitais.min6.spo2,20,130)
-doc.text("SpO2 1 min "+vitais.rec1.spo2,20,140)
-doc.text("SpO2 5 min "+vitais.rec5.spo2,20,150)
+}
 
-doc.save("relatorio_TC6.pdf")
+function compartilharWhats(){
+
+let nome=document.getElementById("nome").value
+
+let texto="Resultado TC6 do paciente "+nome
+
+let url="https://wa.me/?text="+encodeURIComponent(texto)
+
+window.open(url)
 
 }
 
 </script>
 
 </body>
+
 </html>
