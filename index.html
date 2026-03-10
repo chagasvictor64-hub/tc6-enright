@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
+
 <meta charset="UTF-8">
-<title>TC6 Clínico</title>
+<title>TC6 Avaliação Clínica</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 
 body{
-font-family: Arial;
+font-family:Arial;
 background:#eef3f8;
 margin:0;
 }
@@ -19,13 +20,13 @@ margin:0;
 header{
 background:#0b3d91;
 color:white;
-padding:18px;
 text-align:center;
+padding:20px;
 font-size:22px;
 }
 
 .container{
-max-width:800px;
+max-width:900px;
 margin:auto;
 padding:20px;
 }
@@ -40,12 +41,11 @@ box-shadow:0 0 10px rgba(0,0,0,0.08);
 
 input{
 padding:8px;
-margin:6px;
-width:120px;
+margin:5px;
 }
 
 button{
-padding:12px 18px;
+padding:10px 18px;
 border:none;
 border-radius:8px;
 background:#0b3d91;
@@ -54,13 +54,13 @@ cursor:pointer;
 }
 
 #timer{
-font-size:52px;
+font-size:50px;
 text-align:center;
 color:#0b3d91;
 }
 
 #voltas{
-font-size:32px;
+font-size:30px;
 text-align:center;
 margin:10px;
 }
@@ -79,9 +79,8 @@ align-items:center;
 
 .modal-content{
 background:white;
-padding:25px;
+padding:20px;
 border-radius:10px;
-width:300px;
 text-align:center;
 }
 
@@ -90,6 +89,7 @@ margin-top:20px;
 }
 
 </style>
+
 </head>
 
 <body>
@@ -102,11 +102,12 @@ Teste de Caminhada de 6 Minutos
 
 <div class="card">
 
-<h3>Paciente</h3>
+<h3>Dados do Paciente</h3>
 
-<input id="idade" placeholder="Idade">
-<input id="altura" placeholder="Altura cm">
-<input id="peso" placeholder="Peso kg">
+<input id="nome" placeholder="Nome"><br>
+<input id="idade" placeholder="Idade"><br>
+<input id="altura" placeholder="Altura cm"><br>
+<input id="peso" placeholder="Peso kg"><br>
 
 <select id="sexo">
 <option value="m">Masculino</option>
@@ -121,7 +122,7 @@ Teste de Caminhada de 6 Minutos
 
 <div id="timer">06:00</div>
 
-<button onclick="iniciar()">Iniciar Teste</button>
+<button onclick="iniciar()">Iniciar teste</button>
 
 </div>
 
@@ -138,17 +139,19 @@ Teste de Caminhada de 6 Minutos
 
 <div class="card">
 
-<h3>Comprimento do percurso</h3>
+Comprimento do percurso (m)
 
-<input id="percurso" value="30"> metros
+<input id="percurso" value="30">
 
 </div>
 
 <div class="card">
 
-<button onclick="calcular()">Calcular Resultado</button>
+<button onclick="calcular()">Calcular resultado</button>
 
 <div id="resultado"></div>
+
+<button onclick="gerarPDF()">Gerar relatório PDF</button>
 
 </div>
 
@@ -176,12 +179,10 @@ Teste de Caminhada de 6 Minutos
 
 <h3 id="momento"></h3>
 
-<input id="fc" placeholder="FC">
-<input id="spo2" placeholder="SpO2">
-<input id="borgD" placeholder="Borg dispneia">
-<input id="borgF" placeholder="Borg fadiga">
-
-<br><br>
+<input id="fc" placeholder="FC"><br>
+<input id="spo2" placeholder="SpO2"><br>
+<input id="borgD" placeholder="Borg dispneia"><br>
+<input id="borgF" placeholder="Borg fadiga"><br>
 
 <button onclick="salvarVitals()">Salvar</button>
 
@@ -191,12 +192,17 @@ Teste de Caminhada de 6 Minutos
 
 <script>
 
-let tempo = 360
+let tempo=360
 let cronometro
-let voltas = 0
-let momentoAtual = ""
+let voltas=0
 
-let vitais = {
+let distancia=0
+let previsto=0
+let percentual=0
+
+let momentoAtual=""
+
+let vitais={
 inicio:{},
 min3:{},
 min6:{},
@@ -204,21 +210,21 @@ rec1:{},
 rec5:{}
 }
 
-let fcArray = []
-let spo2Array = []
+let fcArray=[]
+let spo2Array=[]
 
 function iniciar(){
 
 abrirModal("inicio")
 
-cronometro = setInterval(()=>{
+cronometro=setInterval(()=>{
 
 tempo--
 
-let min = Math.floor(tempo/60)
-let seg = tempo % 60
+let min=Math.floor(tempo/60)
+let seg=tempo%60
 
-document.getElementById("timer").innerHTML =
+document.getElementById("timer").innerHTML=
 String(min).padStart(2,"0")+":"+
 String(seg).padStart(2,"0")
 
@@ -258,12 +264,11 @@ abrirModal("rec5")
 
 }
 
-function abrirModal(momento){
+function abrirModal(m){
 
-momentoAtual = momento
+momentoAtual=m
 
-document.getElementById("momento").innerText =
-"Coleta: "+momento
+document.getElementById("momento").innerText="Coleta: "+m
 
 document.getElementById("modalVitals").style.display="flex"
 
@@ -271,13 +276,10 @@ document.getElementById("modalVitals").style.display="flex"
 
 function salvarVitals(){
 
-let fc = document.getElementById("fc").value
-let spo2 = document.getElementById("spo2").value
+let fc=document.getElementById("fc").value
+let spo2=document.getElementById("spo2").value
 
-vitais[momentoAtual] = {
-fc:fc,
-spo2:spo2
-}
+vitais[momentoAtual]={fc:fc,spo2:spo2}
 
 fcArray.push(fc)
 spo2Array.push(spo2)
@@ -296,55 +298,40 @@ document.getElementById("voltas").innerHTML=voltas
 function removeVolta(){
 
 if(voltas>0){
-
 voltas--
 document.getElementById("voltas").innerHTML=voltas
-
 }
 
 }
 
 function calcular(){
 
-let percurso =
-Number(document.getElementById("percurso").value)
+let percurso=Number(document.getElementById("percurso").value)
 
-let distancia = voltas * percurso
+distancia=voltas*percurso
 
-let idade =
-Number(document.getElementById("idade").value)
-
-let altura =
-Number(document.getElementById("altura").value)
-
-let peso =
-Number(document.getElementById("peso").value)
-
-let sexo =
-document.getElementById("sexo").value
-
-let previsto
+let idade=Number(document.getElementById("idade").value)
+let altura=Number(document.getElementById("altura").value)
+let peso=Number(document.getElementById("peso").value)
+let sexo=document.getElementById("sexo").value
 
 if(sexo=="m"){
 
-previsto =
-(7.57*altura)-(5.02*idade)-(1.76*peso)-309
+previsto=(7.57*altura)-(5.02*idade)-(1.76*peso)-309
 
 }else{
 
-previsto =
-(2.11*altura)-(2.29*peso)-(5.78*idade)+667
+previsto=(2.11*altura)-(2.29*peso)-(5.78*idade)+667
 
 }
 
-let percentual = (distancia/previsto)*100
+percentual=(distancia/previsto)*100
 
 document.getElementById("resultado").innerHTML=
 
-"Distância: "+distancia+" m<br>"+
-"Previsto: "+Math.round(previsto)+" m<br>"+
-"Capacidade funcional: "+
-Math.round(percentual)+" %"
+"Distância: "+distancia+" m <br>"+
+"Previsto: "+Math.round(previsto)+" m <br>"+
+"Capacidade funcional: "+Math.round(percentual)+" %"
 
 gerarGraficos()
 
@@ -358,15 +345,10 @@ type:"line",
 
 data:{
 labels:["Inicio","3min","6min","1min","5min"],
-
 datasets:[{
-
 label:"Frequência Cardíaca",
-
 data:fcArray
-
 }]
-
 }
 
 })
@@ -377,18 +359,64 @@ type:"line",
 
 data:{
 labels:["Inicio","3min","6min","1min","5min"],
-
 datasets:[{
-
 label:"SpO2",
-
 data:spo2Array
-
 }]
-
 }
 
 })
+
+}
+
+function gerarPDF(){
+
+const { jsPDF } = window.jspdf
+
+let doc=new jsPDF()
+
+let nome=document.getElementById("nome").value
+let data=new Date().toLocaleDateString()
+
+doc.setFontSize(18)
+doc.text("Relatório TC6",20,20)
+
+doc.setFontSize(12)
+
+doc.text("Paciente: "+nome,20,35)
+doc.text("Data: "+data,20,45)
+
+doc.text("Distância: "+distancia+" m",20,60)
+doc.text("Previsto: "+Math.round(previsto)+" m",20,70)
+doc.text("Capacidade funcional: "+Math.round(percentual)+" %",20,80)
+
+doc.text("FC início: "+vitais.inicio.fc,20,100)
+doc.text("FC 3 min: "+vitais.min3.fc,20,110)
+doc.text("FC 6 min: "+vitais.min6.fc,20,120)
+
+doc.text("SpO2 início: "+vitais.inicio.spo2,20,140)
+doc.text("SpO2 3 min: "+vitais.min3.spo2,20,150)
+doc.text("SpO2 6 min: "+vitais.min6.spo2,20,160)
+
+doc.addPage()
+
+doc.text("Gráfico Frequência Cardíaca",20,20)
+
+let graficoFC=document.getElementById("graficoFC")
+let imgFC=graficoFC.toDataURL("image/png")
+
+doc.addImage(imgFC,"PNG",20,30,170,80)
+
+doc.addPage()
+
+doc.text("Gráfico SpO2",20,20)
+
+let graficoSPO2=document.getElementById("graficoSPO2")
+let imgSPO2=graficoSPO2.toDataURL("image/png")
+
+doc.addImage(imgSPO2,"PNG",20,30,170,80)
+
+doc.save("Relatorio_TC6.pdf")
 
 }
 
