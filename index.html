@@ -16,20 +16,20 @@
 body{
 font-family:Arial;
 margin:0;
-background:#F4F6F9;
+background:#F2F4F7;
 }
 
 header{
 background:#6D1B2B;
 color:white;
-padding:15px;
 text-align:center;
+padding:15px;
 font-size:22px;
 font-weight:bold;
 }
 
 .container{
-max-width:500px;
+max-width:520px;
 margin:auto;
 padding:12px;
 display:flex;
@@ -41,7 +41,7 @@ gap:12px;
 background:white;
 padding:15px;
 border-radius:10px;
-box-shadow:0 2px 10px rgba(0,0,0,0.1);
+box-shadow:0 3px 10px rgba(0,0,0,0.1);
 }
 
 h3{
@@ -61,12 +61,16 @@ font-size:16px;
 button{
 width:100%;
 padding:14px;
-margin-top:8px;
+margin-top:10px;
 border:none;
 border-radius:10px;
 background:#6D1B2B;
 color:white;
 font-size:16px;
+}
+
+button:disabled{
+opacity:0.4;
 }
 
 #timer{
@@ -76,16 +80,19 @@ font-weight:bold;
 color:#6D1B2B;
 }
 
+#voltas{
+font-size:42px;
+text-align:center;
+color:#6D1B2B;
+}
+
 #instrucao{
 text-align:center;
-margin-top:6px;
 color:#444;
 }
 
-#voltas{
-font-size:40px;
-text-align:center;
-color:#6D1B2B;
+canvas{
+margin-top:10px;
 }
 
 .badge{
@@ -99,10 +106,6 @@ margin-top:10px;
 .verde{background:#2e7d32}
 .amarelo{background:#f9a825}
 .vermelho{background:#c62828}
-
-canvas{
-margin-top:10px;
-}
 
 .modal{
 display:none;
@@ -125,15 +128,6 @@ width:90%;
 max-width:320px;
 }
 
-.alerta{
-background:#c62828;
-color:white;
-padding:8px;
-margin-top:6px;
-border-radius:6px;
-text-align:center;
-}
-
 </style>
 
 </head>
@@ -151,17 +145,16 @@ text-align:center;
 <h3>Paciente</h3>
 
 <input id="nome" placeholder="Nome">
-
 <input id="idade" placeholder="Idade">
-
-<input id="altura" placeholder="Altura (cm)">
-
-<input id="peso" placeholder="Peso (kg)">
+<input id="altura" placeholder="Altura cm">
+<input id="peso" placeholder="Peso kg">
 
 <select id="sexo">
 <option value="m">Masculino</option>
 <option value="f">Feminino</option>
 </select>
+
+<button onclick="confirmarCadastro()">Confirmar cadastro</button>
 
 </div>
 
@@ -171,9 +164,9 @@ text-align:center;
 
 <div id="timer">06:00</div>
 
-<div id="instrucao">Aguardando início</div>
+<div id="instrucao">Aguardando protocolo</div>
 
-<button onclick="iniciar()">Iniciar teste</button>
+<button id="btnTeste" onclick="iniciar()" disabled>Iniciar teste</button>
 
 </div>
 
@@ -183,13 +176,13 @@ text-align:center;
 
 <div id="voltas">0</div>
 
-<button onclick="addVolta()">Registrar volta</button>
+<button id="btnVolta" onclick="addVolta()" disabled>Registrar volta</button>
 
 </div>
 
 <div class="card">
 
-<h3>Percurso (m)</h3>
+<h3>Percurso</h3>
 
 <input id="percurso" value="30">
 
@@ -203,31 +196,31 @@ text-align:center;
 
 <div id="classe"></div>
 
-<button onclick="calcular()">Calcular</button>
+<button id="btnCalcular" onclick="calcular()" disabled>Calcular resultado</button>
 
-<button onclick="gerarPDF()">Gerar PDF</button>
+<button id="btnPDF" onclick="gerarPDF()" disabled>Gerar PDF</button>
 
-<button onclick="compartilhar()">Compartilhar WhatsApp</button>
+<button id="btnZap" onclick="compartilhar()" disabled>Compartilhar WhatsApp</button>
 
 </div>
 
 <div class="card">
 
-<h3>FC vs Tempo</h3>
+<h3>FC vs tempo</h3>
 <canvas id="graficoFC"></canvas>
 
 </div>
 
 <div class="card">
 
-<h3>SpO₂ vs Tempo</h3>
+<h3>SpO₂ vs tempo</h3>
 <canvas id="graficoSPO2"></canvas>
 
 </div>
 
 <div class="card">
 
-<h3>Borg vs Tempo</h3>
+<h3>Borg vs tempo</h3>
 <canvas id="graficoBORG"></canvas>
 
 </div>
@@ -241,12 +234,8 @@ text-align:center;
 <h3 id="momento"></h3>
 
 <input id="fc" placeholder="FC bpm">
-
 <input id="spo2" placeholder="SpO₂ %">
-
 <input id="borg" placeholder="Borg 0-10">
-
-<div id="alerta"></div>
 
 <button onclick="salvar()">Salvar</button>
 
@@ -256,18 +245,44 @@ text-align:center;
 
 <script>
 
+let etapa="cadastro"
 let tempo=360
 let cronometro
-
 let voltas=0
 
 let fc=[null,null,null,null,null]
 let spo2=[null,null,null,null,null]
 let borg=[null,null,null,null,null]
 
-let momentoAtual=""
+let momentoIndex=0
+
+function confirmarCadastro(){
+
+if(document.getElementById("nome").value==""){
+alert("Preencha dados do paciente")
+return
+}
+
+etapa="basal"
+
+document.getElementById("instrucao").innerText="Realizar coleta basal"
+
+abrir("Coleta Basal")
+
+document.getElementById("btnTeste").disabled=false
+
+}
 
 function iniciar(){
+
+if(etapa!="basal"){
+alert("Realize a coleta basal")
+return
+}
+
+etapa="teste"
+
+document.getElementById("btnVolta").disabled=false
 
 abrir("Início")
 
@@ -278,7 +293,7 @@ tempo--
 let min=Math.floor(tempo/60)
 let seg=tempo%60
 
-document.getElementById("timer").innerHTML=
+document.getElementById("timer").innerText=
 String(min).padStart(2,"0")+":"+String(seg).padStart(2,"0")
 
 if(tempo==240){
@@ -300,11 +315,23 @@ clearInterval(cronometro)
 
 document.getElementById("instrucao").innerText="Teste finalizado"
 
+etapa="recuperacao"
+
 abrir("6 minutos")
 
 setTimeout(()=>abrir("Recuperação 1min"),60000)
 
-setTimeout(()=>abrir("Recuperação 5min"),300000)
+setTimeout(()=>{
+
+abrir("Recuperação 5min")
+
+etapa="relatorio"
+
+document.getElementById("btnCalcular").disabled=false
+document.getElementById("btnPDF").disabled=false
+document.getElementById("btnZap").disabled=false
+
+},300000)
 
 }
 
@@ -314,17 +341,9 @@ setTimeout(()=>abrir("Recuperação 5min"),300000)
 
 function abrir(m){
 
-momentoAtual=m
-
 document.getElementById("momento").innerText=m
 
 document.getElementById("modal").style.display="flex"
-
-document.getElementById("alerta").innerHTML=""
-
-document.getElementById("fc").value=""
-document.getElementById("spo2").value=""
-document.getElementById("borg").value=""
 
 }
 
@@ -334,16 +353,11 @@ let f=document.getElementById("fc").value
 let s=document.getElementById("spo2").value
 let b=document.getElementById("borg").value
 
-if(s<90){
+fc[momentoIndex]=f
+spo2[momentoIndex]=s
+borg[momentoIndex]=b
 
-document.getElementById("alerta").innerHTML=
-'<div class="alerta">Dessaturação detectada</div>'
-
-}
-
-fc.push(f)
-spo2.push(s)
-borg.push(b)
+momentoIndex++
 
 document.getElementById("modal").style.display="none"
 
@@ -358,6 +372,11 @@ document.getElementById("voltas").innerText=voltas
 }
 
 function calcular(){
+
+if(etapa!="relatorio"){
+alert("Finalize o protocolo")
+return
+}
 
 let percurso=document.getElementById("percurso").value
 
@@ -437,8 +456,6 @@ doc.text("Relatório TC6",20,20)
 
 doc.text(document.getElementById("resultado").innerText,20,40)
 
-doc.text("Assinatura profissional",20,200)
-
 doc.save("tc6.pdf")
 
 }
@@ -447,9 +464,7 @@ function compartilhar(){
 
 let texto="Resultado TC6: "+document.getElementById("resultado").innerText
 
-let url="https://wa.me/?text="+encodeURIComponent(texto)
-
-window.open(url)
+window.open("https://wa.me/?text="+encodeURIComponent(texto))
 
 }
 
