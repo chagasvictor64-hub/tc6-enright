@@ -1,473 +1,102 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html>
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>TC6 Avaliação Clínica</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<style>
-
-body{
-font-family:Arial;
-margin:0;
-background:#F2F4F7;
-}
-
-header{
-background:#6D1B2B;
-color:white;
-text-align:center;
-padding:15px;
-font-size:22px;
-font-weight:bold;
-}
-
-.container{
-max-width:520px;
-margin:auto;
-padding:12px;
-display:flex;
-flex-direction:column;
-gap:12px;
-}
-
-.card{
-background:white;
-padding:15px;
-border-radius:10px;
-box-shadow:0 3px 10px rgba(0,0,0,0.1);
-}
-
-h3{
-margin-top:0;
-color:#6D1B2B;
-}
-
-input,select{
-width:100%;
-padding:12px;
-margin-top:6px;
-border-radius:8px;
-border:1px solid #ccc;
-font-size:16px;
-}
-
-button{
-width:100%;
-padding:14px;
-margin-top:10px;
-border:none;
-border-radius:10px;
-background:#6D1B2B;
-color:white;
-font-size:16px;
-}
-
-button:disabled{
-opacity:0.4;
-}
-
-#timer{
-font-size:60px;
-text-align:center;
-font-weight:bold;
-color:#6D1B2B;
-}
-
-#voltas{
-font-size:42px;
-text-align:center;
-color:#6D1B2B;
-}
-
-#instrucao{
-text-align:center;
-color:#444;
-}
-
-canvas{
-margin-top:10px;
-}
-
-.badge{
-padding:10px;
-border-radius:8px;
-text-align:center;
-color:white;
-margin-top:10px;
-}
-
-.verde{background:#2e7d32}
-.amarelo{background:#f9a825}
-.vermelho{background:#c62828}
-
-.modal{
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.6);
-justify-content:center;
-align-items:center;
-z-index:999;
-}
-
-.modal-content{
-background:white;
-padding:20px;
-border-radius:10px;
-width:90%;
-max-width:320px;
-}
-
-</style>
-
+  <title>TC6 - Enright & Sherrill</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background-color: #f4f6f8;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: auto;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+    }
+    button {
+      background-color: #2c7be5;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #1a5ec8;
+    }
+    .resultado {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #eef2f7;
+      border-radius: 6px;
+    }
+  </style>
 </head>
-
 <body>
 
-<header>
-🏥 TC6 Avaliação Funcional
-</header>
-
-<div class="container">
-
 <div class="card">
+  <h2>TC6 - Enright & Sherrill</h2>
 
-<h3>Paciente</h3>
+  <label>Sexo</label>
+  <select id="sexo">
+    <option value="Masculino">Masculino</option>
+    <option value="Feminino">Feminino</option>
+  </select>
 
-<input id="nome" placeholder="Nome">
-<input id="idade" placeholder="Idade">
-<input id="altura" placeholder="Altura cm">
-<input id="peso" placeholder="Peso kg">
+  <label>Idade (anos)</label>
+  <input type="number" id="idade">
 
-<select id="sexo">
-<option value="m">Masculino</option>
-<option value="f">Feminino</option>
-</select>
+  <label>Altura (cm)</label>
+  <input type="number" id="altura">
 
-<button onclick="confirmarCadastro()">Confirmar cadastro</button>
+  <label>Peso (kg)</label>
+  <input type="number" id="peso">
 
-</div>
+  <label>Distância percorrida (m)</label>
+  <input type="number" id="realizado">
 
-<div class="card">
+  <button onclick="calcular()">Calcular</button>
 
-<h3>Cronômetro</h3>
-
-<div id="timer">06:00</div>
-
-<div id="instrucao">Aguardando protocolo</div>
-
-<button id="btnTeste" onclick="iniciar()" disabled>Iniciar teste</button>
-
-</div>
-
-<div class="card">
-
-<h3>Voltas</h3>
-
-<div id="voltas">0</div>
-
-<button id="btnVolta" onclick="addVolta()" disabled>Registrar volta</button>
-
-</div>
-
-<div class="card">
-
-<h3>Percurso</h3>
-
-<input id="percurso" value="30">
-
-</div>
-
-<div class="card">
-
-<h3>Resultado</h3>
-
-<div id="resultado"></div>
-
-<div id="classe"></div>
-
-<button id="btnCalcular" onclick="calcular()" disabled>Calcular resultado</button>
-
-<button id="btnPDF" onclick="gerarPDF()" disabled>Gerar PDF</button>
-
-<button id="btnZap" onclick="compartilhar()" disabled>Compartilhar WhatsApp</button>
-
-</div>
-
-<div class="card">
-
-<h3>FC vs tempo</h3>
-<canvas id="graficoFC"></canvas>
-
-</div>
-
-<div class="card">
-
-<h3>SpO₂ vs tempo</h3>
-<canvas id="graficoSPO2"></canvas>
-
-</div>
-
-<div class="card">
-
-<h3>Borg vs tempo</h3>
-<canvas id="graficoBORG"></canvas>
-
-</div>
-
-</div>
-
-<div class="modal" id="modal">
-
-<div class="modal-content">
-
-<h3 id="momento"></h3>
-
-<input id="fc" placeholder="FC bpm">
-<input id="spo2" placeholder="SpO₂ %">
-<input id="borg" placeholder="Borg 0-10">
-
-<button onclick="salvar()">Salvar</button>
-
-</div>
-
+  <div class="resultado" id="resultado"></div>
 </div>
 
 <script>
+function calcular() {
+  const sexo = document.getElementById("sexo").value;
+  const idade = parseFloat(document.getElementById("idade").value);
+  const altura = parseFloat(document.getElementById("altura").value);
+  const peso = parseFloat(document.getElementById("peso").value);
+  const realizado = parseFloat(document.getElementById("realizado").value);
 
-let etapa="cadastro"
-let tempo=360
-let cronometro
-let voltas=0
+  let previsto;
 
-let fc=[null,null,null,null,null]
-let spo2=[null,null,null,null,null]
-let borg=[null,null,null,null,null]
+  if (sexo === "Masculino") {
+    previsto = (7.57 * altura) - (5.02 * idade) - (1.76 * peso) - 309;
+  } else {
+    previsto = (2.11 * altura) - (2.29 * peso) - (5.78 * idade) + 667;
+  }
 
-let momentoIndex=0
+  const percentual = (realizado / previsto) * 100;
 
-function confirmarCadastro(){
+  let classificacao;
+  if (percentual >= 100) classificacao = "Excelente";
+  else if (percentual >= 80) classificacao = "Dentro do esperado";
+  else if (percentual >= 60) classificacao = "Redução leve/moderada";
+  else classificacao = "Redução importante";
 
-if(document.getElementById("nome").value==""){
-alert("Preencha dados do paciente")
-return
+  document.getElementById("resultado").innerHTML = `
+    <strong>Distância Prevista:</strong> ${previsto.toFixed(2)} m<br>
+    <strong>Percentual:</strong> ${percentual.toFixed(1)}%<br>
+    <strong>Classificação:</strong> ${classificacao}
+  `;
 }
-
-etapa="basal"
-
-document.getElementById("instrucao").innerText="Realizar coleta basal"
-
-abrir("Coleta Basal")
-
-document.getElementById("btnTeste").disabled=false
-
-}
-
-function iniciar(){
-
-if(etapa!="basal"){
-alert("Realize a coleta basal")
-return
-}
-
-etapa="teste"
-
-document.getElementById("btnVolta").disabled=false
-
-abrir("Início")
-
-cronometro=setInterval(()=>{
-
-tempo--
-
-let min=Math.floor(tempo/60)
-let seg=tempo%60
-
-document.getElementById("timer").innerText=
-String(min).padStart(2,"0")+":"+String(seg).padStart(2,"0")
-
-if(tempo==240){
-document.getElementById("instrucao").innerText="Você está indo bem"
-}
-
-if(tempo==120){
-document.getElementById("instrucao").innerText="Faltam 2 minutos"
-abrir("3 minutos")
-}
-
-if(tempo==30){
-document.getElementById("instrucao").innerText="Continue caminhando"
-}
-
-if(tempo==0){
-
-clearInterval(cronometro)
-
-document.getElementById("instrucao").innerText="Teste finalizado"
-
-etapa="recuperacao"
-
-abrir("6 minutos")
-
-setTimeout(()=>abrir("Recuperação 1min"),60000)
-
-setTimeout(()=>{
-
-abrir("Recuperação 5min")
-
-etapa="relatorio"
-
-document.getElementById("btnCalcular").disabled=false
-document.getElementById("btnPDF").disabled=false
-document.getElementById("btnZap").disabled=false
-
-},300000)
-
-}
-
-},1000)
-
-}
-
-function abrir(m){
-
-document.getElementById("momento").innerText=m
-
-document.getElementById("modal").style.display="flex"
-
-}
-
-function salvar(){
-
-let f=document.getElementById("fc").value
-let s=document.getElementById("spo2").value
-let b=document.getElementById("borg").value
-
-fc[momentoIndex]=f
-spo2[momentoIndex]=s
-borg[momentoIndex]=b
-
-momentoIndex++
-
-document.getElementById("modal").style.display="none"
-
-}
-
-function addVolta(){
-
-voltas++
-
-document.getElementById("voltas").innerText=voltas
-
-}
-
-function calcular(){
-
-if(etapa!="relatorio"){
-alert("Finalize o protocolo")
-return
-}
-
-let percurso=document.getElementById("percurso").value
-
-let distancia=voltas*percurso
-
-let idade=document.getElementById("idade").value
-let altura=document.getElementById("altura").value
-let peso=document.getElementById("peso").value
-let sexo=document.getElementById("sexo").value
-
-let previsto
-
-if(sexo=="m"){
-previsto=(7.57*altura)-(5.02*idade)-(1.76*peso)-309
-}else{
-previsto=(2.11*altura)-(2.29*peso)-(5.78*idade)+667
-}
-
-let percentual=(distancia/previsto)*100
-
-let interpretacao=""
-
-if(percentual>=80){
-interpretacao="Capacidade funcional preservada"
-document.getElementById("classe").innerHTML='<div class="badge verde">'+interpretacao+'</div>'
-}
-
-else if(percentual>=60){
-interpretacao="Capacidade moderada"
-document.getElementById("classe").innerHTML='<div class="badge amarelo">'+interpretacao+'</div>'
-}
-
-else{
-interpretacao="Capacidade reduzida"
-document.getElementById("classe").innerHTML='<div class="badge vermelho">'+interpretacao+'</div>'
-}
-
-document.getElementById("resultado").innerHTML=
-
-"Distância: "+distancia+" m<br>"+
-"Previsto: "+Math.round(previsto)+" m<br>"+
-"Capacidade: "+Math.round(percentual)+" %"
-
-gerarGraficos()
-
-}
-
-function gerarGraficos(){
-
-new Chart(graficoFC,{
-type:"line",
-data:{labels:["Inicio","3m","6m","Rec1","Rec5"],
-datasets:[{label:"FC",data:fc}]}
-})
-
-new Chart(graficoSPO2,{
-type:"line",
-data:{labels:["Inicio","3m","6m","Rec1","Rec5"],
-datasets:[{label:"SpO₂",data:spo2}]}
-})
-
-new Chart(graficoBORG,{
-type:"line",
-data:{labels:["Inicio","3m","6m","Rec1","Rec5"],
-datasets:[{label:"Borg",data:borg}]}
-})
-
-}
-
-function gerarPDF(){
-
-const { jsPDF } = window.jspdf
-
-let doc=new jsPDF()
-
-doc.text("Relatório TC6",20,20)
-
-doc.text(document.getElementById("resultado").innerText,20,40)
-
-doc.save("tc6.pdf")
-
-}
-
-function compartilhar(){
-
-let texto="Resultado TC6: "+document.getElementById("resultado").innerText
-
-window.open("https://wa.me/?text="+encodeURIComponent(texto))
-
-}
-
 </script>
 
 </body>
